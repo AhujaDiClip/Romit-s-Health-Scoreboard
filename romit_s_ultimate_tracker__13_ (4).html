@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Romit's Health Innings</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        pitch: { 900: '#0f172a', 800: '#1e293b', 700: '#334155' },
+                        turf: { 500: '#10b981', 600: '#059669' },
+                        gold: { 400: '#fbbf24', 500: '#f59e0b' },
+                        danger: { 500: '#ef4444', 600: '#dc2626' },
+                        water: { 400: '#38bdf8', 500: '#0ea5e9' },
+                        purple: { 400: '#a78bfa', 500: '#8b5cf6' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        sports: ['Oswald', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar & Utility */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        
+        body { 
+            -webkit-tap-highlight-color: transparent; 
+            background-color: #0f172a; 
+            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            background-attachment: fixed;
+            user-select: none;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .led-text { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor; }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes toastSlide {
+            0% { transform: translate(-50%, -150%); opacity: 0; }
+            10%, 90% { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -150%); opacity: 0; }
+        }
+        .toast { animation: toastSlide 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+        /* Cricket Event Animations */
+        @keyframes flySixer {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: translate(15vw, -40vh) scale(2.5) rotate(360deg); }
+            100% { transform: translate(100vw, -100vh) scale(0.5) rotate(720deg); opacity: 0; }
+        }
+        .anim-flying-ball {
+            position: fixed; bottom: 15%; left: 10%; font-size: 50px; z-index: 9999;
+            animation: flySixer 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            pointer-events: none; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+        }
+
+        @keyframes smashText {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; }
+            40% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; }
+            70% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.5) rotate(10deg); opacity: 0; }
+        }
+        .anim-center-text {
+            position: fixed; top: 40%; left: 50%; font-size: 70px; font-weight: 900;
+            font-family: 'Oswald', sans-serif; text-transform: uppercase; z-index: 9999;
+            text-shadow: 0 0 30px currentColor, 0 10px 20px rgba(0,0,0,0.8);
+            animation: smashText 1.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            pointer-events: none; white-space: nowrap;
+        }
+
+        @keyframes screenShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px) rotate(-1deg); }
+            20%, 40%, 60%, 80% { transform: translateX(8px) rotate(1deg); }
+        }
+        .shake-screen { animation: screenShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
+        @keyframes batSwing {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-45deg); }
+            40% { transform: rotate(15deg); }
+        }
+        .swinging-bat { 
+            display: inline-block; animation: batSwing 2s infinite ease-in-out; 
+            transform-origin: bottom left; filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
+        }
+
+        /* Trophies & Dhoni Tier */
+        @keyframes dhoniGlow {
+            0% { box-shadow: 0 0 10px #f59e0b, inset 0 0 10px #f59e0b; transform: scale(1); }
+            100% { box-shadow: 0 0 25px #fbbf24, inset 0 0 20px #fbbf24; transform: scale(1.03); }
+        }
+        .dhoni-tier {
+            background: linear-gradient(135deg, #1e293b 0%, #f59e0b 100%) !important;
+            border-color: #fbbf24 !important;
+            color: #000 !important;
+            animation: dhoniGlow 1.5s infinite alternate !important;
+        }
+        .dhoni-tier i, .dhoni-tier h4, .dhoni-tier p {
+            color: #000 !important;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed; top: -10px; width: 10px; height: 10px; z-index: 99999;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(720deg); }
+        }
+
+        .cricket-tick { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .cricket-tick.ticked {
+            background-color: #10b981; border-color: #10b981; color: #000; pointer-events: none;
+            transform: scale(1.1);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
+        .nav-btn.active { color: #fbbf24; }
+        .badge-locked { filter: grayscale(100%); opacity: 0.2; }
+
+        @keyframes pulseSleep { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        .sleep-text { animation: pulseSleep 3s infinite; }
+        .powerplay-glow { animation: ppGlow 1.5s ease-in-out infinite alternate; }
+        @keyframes ppGlow { from { box-shadow: 0 0 10px #fbbf24; } to { box-shadow: 0 0 20px #f59e0b; } }
+    </style>
+</head>
+<body class="text-slate-200 antialiased h-screen flex flex-col overflow-hidden dark">
+
+    <!-- Global App Watermark -->
+    <div class="fixed top-2 right-2 flex items-center z-[60]">
+        <button onclick="showAbout()" class="flex items-center gap-1.5 text-[10px] font-sports font-bold text-gold-400/90 whitespace-nowrap tracking-widest select-none bg-pitch-900/40 px-3 py-1 rounded-full border border-gold-500/20 backdrop-blur-sm hover:bg-pitch-900/70 hover:border-gold-500/50 transition active:scale-95">
+            <span class="swinging-bat inline-block">🏏</span> BY AHUJA DI CLIP
+        </button>
+    </div>
+
+    <!-- About Ahuja Di Clip -->
+    <div id="aboutModal" class="fixed inset-0 z-[100] bg-black/90 hidden flex-col items-center justify-center p-4">
+        <div class="glass-panel p-6 rounded-2xl w-full max-w-sm border-gold-500/30 shadow-2xl shadow-gold-500/10 relative animate-pop">
+            <button onclick="closeModal('aboutModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            <div class="w-16 h-16 bg-pitch-800 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-gold-500/50">
+                <span class="text-3xl swinging-bat">🏏</span>
+            </div>
+            <h3 class="text-lg font-sports font-bold text-gold-400 uppercase tracking-widest text-center mb-1">Ahuja Di Clip</h3>
+            <p class="text-[10px] text-slate-400 text-center uppercase tracking-[0.2em] mb-5">Build. Brand. Bowl them over.</p>
+            <ul class="space-y-3 text-sm text-slate-300">
+                <li class="flex items-start gap-3">
+                    <div class="w-8 h-8 shrink-0 rounded bg-gold-500/20 text-gold-400 flex items-center justify-center"><i class="fas fa-heartbeat"></i></div>
+                    <span>Custom health &amp; fitness apps, built to fit exactly how you train.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <div class="w-8 h-8 shrink-0 rounded bg-gold-500/20 text-gold-400 flex items-center justify-center"><i class="fas fa-file-alt"></i></div>
+                    <span>Sharp, standout CVs that get you noticed.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <div class="w-8 h-8 shrink-0 rounded bg-gold-500/20 text-gold-400 flex items-center justify-center"><i class="fas fa-globe"></i></div>
+                    <span>Customer experience websites for brands that want to feel premium.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <div class="w-8 h-8 shrink-0 rounded bg-gold-500/20 text-gold-400 flex items-center justify-center"><i class="fas fa-bolt"></i></div>
+                    <span>Random fun campaigns, whatever the vibe calls for.</span>
+                </li>
+            </ul>
+            <button onclick="closeModal('aboutModal')" class="w-full mt-6 bg-gold-500 text-black font-bold py-3 rounded-lg uppercase tracking-widest hover:bg-gold-400 transition active:scale-95 shadow-lg">Got It</button>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none hidden">
+        <div id="toastMsg" class="bg-pitch-800 border border-gold-500 text-gold-400 px-6 py-3 rounded-full shadow-xl flex items-center gap-3 font-semibold text-sm">
+            <i class="fas fa-bell"></i> <span id="toastText">Action logged!</span>
+        </div>
+    </div>
+
+    <div id="loginScreen" class="fixed inset-0 z-[200] bg-pitch-900 flex flex-col items-center justify-center p-6 transition-opacity duration-700">
+        <div class="glass-panel p-8 rounded-2xl w-full max-w-sm text-center animate-pop border-gold-500/30 shadow-2xl shadow-gold-500/10 relative z-10">
+            <div class="w-24 h-24 bg-pitch-800 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-gold-500/50 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+                <div class="text-5xl swinging-bat">🏏</div>
+            </div>
+            <h1 class="text-3xl font-sports font-bold text-white mb-1 uppercase tracking-wide leading-tight">Romit's Health<br><span class="text-gold-400">Scoreboard</span></h1>
+            <p class="text-[10px] text-gold-500/80 tracking-[0.3em] mb-2 uppercase font-bold">By Ahuja Di Clip</p>
+            <p class="text-sm text-slate-400 mb-5">The Ultimate Health Innings</p>
+            
+            <div class="flex flex-wrap justify-center gap-2 mb-8">
+                <span class="text-[9px] uppercase tracking-widest font-bold bg-purple-500/20 text-purple-400 px-2 py-1 rounded border border-purple-500/30"><i class="fas fa-user-ninja mr-1"></i> Impact Player</span>
+                <span class="text-[9px] uppercase tracking-widest font-bold bg-gold-500/20 text-gold-400 px-2 py-1 rounded border border-gold-500/30"><i class="fas fa-crown mr-1"></i> Thala Trophies</span>
+                <span class="text-[9px] uppercase tracking-widest font-bold bg-turf-500/20 text-turf-500 px-2 py-1 rounded border border-turf-500/30"><i class="fas fa-moon mr-1"></i> Sleep Recovery</span>
+            </div>
+
+            <button onclick="enterArena()" class="w-full bg-gold-500 text-black font-bold py-4 rounded-xl uppercase tracking-wider hover:bg-gold-400 transition transform hover:scale-[1.02] shadow-lg shadow-gold-500/20 active:scale-95">
+                Step Onto The Pitch
+            </button>
+        </div>
+    </div>
+
+    <div id="appContainer" class="hidden flex-col h-full w-full max-w-lg mx-auto relative">
+        
+        <header class="flex justify-between items-center p-4 pt-6 shrink-0 border-b border-slate-800 glass-panel z-10">
+            <div>
+                <h2 class="text-xl font-sports font-bold tracking-wide uppercase text-white flex items-center gap-2">
+                    Romit's Innings
+                    <span id="digitalClock" class="text-xs font-mono bg-pitch-800 px-2 py-1 rounded text-gold-400 border border-gold-500/30 shadow-inner">00:00:00</span>
+                </h2>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-danger-500 animate-pulse"></span>
+                    <span class="text-[10px] text-danger-500 font-bold tracking-widest uppercase">Live Match</span>
+                    <span id="powerplayIndicator" class="hidden text-[10px] bg-gold-500 text-black px-2 py-0.5 rounded-full font-bold tracking-widest uppercase powerplay-glow ml-2">⚡ Powerplay</span>
+                </div>
+            </div>
+            <button onclick="showRulebook()" class="w-10 h-10 rounded-full bg-pitch-800 border border-slate-700 flex items-center justify-center text-gold-400 hover:bg-slate-700 transition active:scale-90">
+                <i class="fas fa-book-open"></i>
+            </button>
+        </header>
+
+        <main class="flex-1 overflow-y-auto pb-24 px-4 custom-scrollbar relative pt-4">
+            
+            <div id="tab-score" class="tab-content active space-y-6">
+                
+                <div class="glass-panel rounded-2xl p-5 border-t-4 border-t-gold-500 relative overflow-hidden shadow-xl">
+                    <i class="fas fa-cricket-bat-ball absolute -right-4 -bottom-4 text-7xl text-white opacity-5"></i>
+                    
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Score</span>
+                        <div id="formGuide" class="flex gap-1"></div>
+                    </div>
+                    
+                    <div class="flex justify-center items-baseline gap-4 my-4 font-sports">
+                        <div class="text-7xl font-bold text-white led-text drop-shadow-lg" id="mainRuns">0</div>
+                        <div class="text-4xl text-slate-600">-</div>
+                        <div class="text-6xl font-bold text-danger-500 led-text drop-shadow-lg" id="mainWickets">0</div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center bg-pitch-900/60 rounded-lg p-3 mb-3 border border-slate-700/50 shadow-inner">
+                        <span class="text-xs font-bold text-gold-400 uppercase tracking-wider">Target: 30</span>
+                        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider" id="rrrDisplay">RRR: 0.0</span>
+                    </div>
+
+                    <div class="flex justify-between text-[11px] uppercase tracking-wider text-slate-400 font-semibold border-t border-slate-700 pt-3">
+                        <span class="text-water-400 flex items-center gap-1"><i class="fas fa-tint"></i> Water <span id="waterTracker" class="bg-water-500/20 text-water-400 px-1.5 py-0.5 rounded text-[9px] font-bold">x0</span></span>
+                        <span class="text-turf-500"><i class="fas fa-check-circle"></i> Timing</span>
+                        <span class="text-danger-500"><i class="fas fa-hamburger"></i> Cheats</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="logWater()" class="glass-panel p-4 rounded-xl flex flex-col items-center justify-center gap-2 border border-water-500/30 hover:bg-water-500/10 transition group active:scale-95 shadow-lg">
+                        <div class="w-12 h-12 rounded-full bg-water-500/20 text-water-400 flex items-center justify-center group-hover:scale-110 transition shadow-inner">
+                            <i class="fas fa-glass-water text-xl"></i>
+                        </div>
+                        <span class="text-xs font-bold text-slate-300 tracking-wide">+ Drink (1 Run)</span>
+                    </button>
+                    <button onclick="openCanteen()" class="glass-panel p-4 rounded-xl flex flex-col items-center justify-center gap-2 border border-danger-500/30 hover:bg-danger-500/10 transition group active:scale-95 shadow-lg">
+                        <div class="w-12 h-12 rounded-full bg-danger-500/20 text-danger-500 flex items-center justify-center group-hover:scale-110 transition shadow-inner">
+                            <i class="fas fa-utensils text-xl"></i>
+                        </div>
+                        <span class="text-xs font-bold text-slate-300 tracking-wide">Food DB / Cheat</span>
+                    </button>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-gold-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <i class="fas fa-list-ol"></i> Today's Overs (Routine)
+                    </h3>
+                    <div class="glass-panel rounded-xl divide-y divide-slate-700/50 shadow-lg">
+                        
+                        <div class="p-4 flex justify-between items-center group hover:bg-slate-800/30 transition">
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-200">Morning Sun Bath (Vit D)</h4>
+                                <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock"></i> 07:15 (10 Mins)</p>
+                            </div>
+                            <button id="btn-sun" onclick="logTask('Morning Sun Bath', '07:15', 'btn-sun')" class="cricket-tick w-8 h-8 rounded-full border-2 border-slate-500 text-transparent flex items-center justify-center text-sm font-bold hover:border-turf-500 hover:text-turf-500 shadow-inner">✓</button>
+                        </div>
+                        
+                        <div class="p-4 flex justify-between items-center group hover:bg-slate-800/30 transition">
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-200">Breakfast (Healthy)</h4>
+                                <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock"></i> 08:30 (Metabolism)</p>
+                            </div>
+                            <button id="btn-bf" onclick="logTask('Breakfast', '08:30', 'btn-bf')" class="cricket-tick w-8 h-8 rounded-full border-2 border-slate-500 text-transparent flex items-center justify-center text-sm font-bold hover:border-turf-500 hover:text-turf-500 shadow-inner">✓</button>
+                        </div>
+
+                        <div class="p-4 flex justify-between items-center group hover:bg-slate-800/30 transition">
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-200">Healthy Lunch (Fiber)</h4>
+                                <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock"></i> 13:30 (Lower LDL)</p>
+                            </div>
+                            <button id="btn-lunch" onclick="logTask('Lunch', '13:30', 'btn-lunch')" class="cricket-tick w-8 h-8 rounded-full border-2 border-slate-500 text-transparent flex items-center justify-center text-sm font-bold hover:border-turf-500 hover:text-turf-500 shadow-inner">✓</button>
+                        </div>
+
+                        <div class="p-4 flex justify-between items-center group hover:bg-slate-800/30 transition">
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-200">Evening Snack (Nuts)</h4>
+                                <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock"></i> 16:00 (Boost HDL)</p>
+                            </div>
+                            <button id="btn-snack" onclick="logTask('Evening Snack', '16:00', 'btn-snack')" class="cricket-tick w-8 h-8 rounded-full border-2 border-slate-500 text-transparent flex items-center justify-center text-sm font-bold hover:border-turf-500 hover:text-turf-500 shadow-inner">✓</button>
+                        </div>
+
+                        <div class="p-4 flex justify-between items-center group hover:bg-slate-800/30 transition">
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-200">Light Dinner</h4>
+                                <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock"></i> 20:30 (Liver Prep)</p>
+                            </div>
+                            <button id="btn-din" onclick="logTask('Dinner', '20:30', 'btn-din')" class="cricket-tick w-8 h-8 rounded-full border-2 border-slate-500 text-transparent flex items-center justify-center text-sm font-bold hover:border-turf-500 hover:text-turf-500 shadow-inner">✓</button>
+                        </div>
+
+                        <div class="p-4 flex justify-between items-center group hover:bg-slate-800/30 transition">
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-200">Post-Dinner Walk</h4>
+                                <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock"></i> 21:30 (Burn Triglycerides)</p>
+                            </div>
+                            <button id="btn-walk" onclick="logTask('Night Walk', '21:30', 'btn-walk')" class="cricket-tick w-8 h-8 rounded-full border-2 border-slate-500 text-transparent flex items-center justify-center text-sm font-bold hover:border-turf-500 hover:text-turf-500 shadow-inner">✓</button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <i class="fas fa-microphone-alt"></i> Live Commentary
+                    </h3>
+                    <div id="commentaryBox" class="glass-panel rounded-xl p-4 max-h-60 overflow-y-auto flex flex-col gap-3 custom-scrollbar text-sm shadow-inner">
+                    </div>
+                </div>
+
+                <button onclick="declareInnings()" class="w-full bg-slate-800 border-2 border-gold-500 text-gold-400 font-bold py-4 rounded-xl uppercase tracking-widest hover:bg-gold-500 hover:text-black transition active:scale-95 shadow-[0_0_15px_rgba(251,191,36,0.3)]">
+                    🏏 Declare Innings (Save)
+                </button>
+            </div>
+
+            <div id="tab-physio" class="tab-content space-y-6">
+                <div class="text-center py-4">
+                    <div class="w-16 h-16 bg-turf-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-turf-500 text-2xl border border-turf-500/30 shadow-[inset_0_0_10px_rgba(16,185,129,0.3)]">
+                        <i class="fas fa-briefcase-medical"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-1 tracking-wide">Physio Room</h2>
+                    <p class="text-xs text-slate-400 px-4">Manage supplements for Liver Enzymes (SGOT/SGPT) and Vitamin D deficiency (8.39 ng/mL).</p>
+                </div>
+
+                <div class="glass-panel rounded-xl divide-y divide-slate-700/50 shadow-lg">
+                    <div class="p-5 hover:bg-slate-800/30 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-bold text-turf-500">Omega-3 & Liver Support</h4>
+                                <p class="text-xs text-slate-300 mt-1">Daily with Lunch. Lowers Triglycerides.</p>
+                            </div>
+                            <button id="btn-sup-liver" onclick="logSupplement('Liver Support', 'btn-sup-liver')" class="cricket-tick w-8 h-8 shrink-0 rounded-full border-2 border-slate-500 text-transparent flex items-center justify-center text-sm font-bold hover:border-turf-500 hover:text-turf-500 shadow-inner">✓</button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-5 border-l-4 border-l-gold-500 bg-gold-500/5 hover:bg-gold-500/10 transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-bold text-gold-400">Vitamin D (60k IU Sachet)</h4>
+                                <p class="text-xs text-slate-300 mt-1">Strictly Once a Week!</p>
+                                <p class="text-[10px] text-slate-400 mt-2 uppercase font-bold tracking-wider">Last Dose: <span id="vitDStatus" class="text-gold-400">Never</span></p>
+                            </div>
+                            <button id="btn-sup-vitd" onclick="logVitD()" class="cricket-tick w-8 h-8 shrink-0 rounded-full border-2 border-gold-500 text-transparent flex items-center justify-center text-sm font-bold hover:bg-gold-500 hover:text-black shadow-inner">✓</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="logSleep()" class="w-full glass-panel border border-purple-500/50 text-purple-400 p-4 rounded-xl flex items-center justify-between hover:bg-purple-500/20 transition shadow-[0_0_15px_rgba(168,85,247,0.15)] active:scale-95">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center"><i class="fas fa-bed text-lg"></i></div>
+                        <div class="text-left">
+                            <div class="text-sm font-bold text-white">Night Watchman (Sleep)</div>
+                            <div class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Liver recovery active</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-plus bg-purple-500/20 w-6 h-6 rounded flex items-center justify-center text-xs"></i>
+                </button>
+            </div>
+
+            <div id="tab-kitchen" class="tab-content space-y-6">
+                <div class="text-center py-4">
+                    <div class="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-orange-500 text-2xl border border-orange-500/30 shadow-[inset_0_0_15px_rgba(249,115,22,0.3)]">
+                        <i class="fas fa-fire-burner"></i>
+                    </div>
+                    <h2 class="text-xl font-sports font-bold text-white mb-1 tracking-wide uppercase">The Kitchen Locker</h2>
+                    <p class="text-xs text-slate-400 px-4">8+ Detailed Liver & Cholesterol Healing Recipes. Export ingredients to WhatsApp in 1 click!</p>
+                </div>
+
+                <!-- Kitchen Search & Filter Bar -->
+                <div class="space-y-3">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input type="text" id="recipeSearch" onkeyup="filterKitchenRecipes()" placeholder="Search recipes or ingredients (e.g., Oats, Palak, Tofu)..." class="w-full bg-pitch-900 text-white text-xs rounded-xl py-3 pl-11 pr-4 outline-none border border-slate-700 focus:border-orange-500 transition shadow-inner">
+                    </div>
+
+                    <!-- Category Filter Chips -->
+                    <div class="flex gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-[11px] font-bold">
+                        <button onclick="setRecipeCategory('all', this)" class="recipe-cat-btn active bg-orange-500 text-black px-3.5 py-1.5 rounded-lg shrink-0 transition shadow-md">All Recipes</button>
+                        <button onclick="setRecipeCategory('breakfast', this)" class="recipe-cat-btn bg-pitch-800 text-slate-400 border border-slate-700 hover:text-white px-3.5 py-1.5 rounded-lg shrink-0 transition">Breakfast</button>
+                        <button onclick="setRecipeCategory('lunch', this)" class="recipe-cat-btn bg-pitch-800 text-slate-400 border border-slate-700 hover:text-white px-3.5 py-1.5 rounded-lg shrink-0 transition">Lunch & Dinner</button>
+                        <button onclick="setRecipeCategory('snack', this)" class="recipe-cat-btn bg-pitch-800 text-slate-400 border border-slate-700 hover:text-white px-3.5 py-1.5 rounded-lg shrink-0 transition">Snacks & Drinks</button>
+                    </div>
+                </div>
+
+                <!-- Recipe Cards Container -->
+                <div id="recipeCardsContainer" class="space-y-4">
+                    
+                    <!-- Recipe 1 -->
+                    <div class="recipe-card glass-panel rounded-2xl p-4 border-l-4 border-l-orange-500 shadow-lg space-y-3" data-category="breakfast" data-search="moong dal chilla breakfast protein paneer spinach palak">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/30">High Protein</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-turf-500/20 text-turf-500 px-2 py-0.5 rounded border border-turf-500/30">Zero Cholesterol</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-100">Moong Dal & Palak Chilla</h4>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><i class="far fa-clock"></i> 15 Mins Prep • Breakfast Special</p>
+                            </div>
+                            <button onclick="sendWA('Moong Dal & Palak Chilla', ['Yellow Moong Dal (1 cup)', 'Paneer (50g grated)', 'Spinach/Palak (1/2 cup chopped)', 'Green Chillies (1)', 'Ginger (1/2 inch)', 'Cumin Seeds (1/2 tsp)', 'Turmeric (1/4 tsp)', 'Mustard/Olive Oil (1 tsp)'])" class="bg-green-600/20 text-green-500 border border-green-500/40 p-2.5 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition active:scale-90 shadow-md">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-pitch-900/80 rounded-xl p-3 border border-slate-700/60 text-xs space-y-2">
+                            <div>
+                                <strong class="text-gold-400 uppercase text-[10px] tracking-wider block mb-1">🛒 Key Ingredients:</strong>
+                                <p class="text-slate-300 leading-relaxed text-[11px]">Yellow Moong Dal (1 cup), Grated Paneer (50g), Chopped Palak (1/2 cup), Ginger, Green Chilli, Cumin, Turmeric.</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2">
+                                <strong class="text-turf-500 uppercase text-[10px] tracking-wider block mb-1">👨‍🍳 Cooking Method:</strong>
+                                <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px] leading-relaxed">
+                                    <li>Soak moong dal overnight (or 3 hrs in warm water).</li>
+                                    <li>Grind soaked dal with ginger & chilli into a smooth batter.</li>
+                                    <li>Fold in chopped spinach, cumin, haldi, and salt.</li>
+                                    <li>Pour onto a warm non-stick tava with 1/2 tsp oil. Cook until golden.</li>
+                                    <li>Stuff with grated paneer and serve fresh with green chutney.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipe 2 -->
+                    <div class="recipe-card glass-panel rounded-2xl p-4 border-l-4 border-l-orange-500 shadow-lg space-y-3" data-category="breakfast" data-search="overnight chia oats ldl cholesterol oats apple nuts walnuts almond">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-water-500/20 text-water-400 px-2 py-0.5 rounded border border-water-500/30">Lowers LDL (160 Target)</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded border border-purple-500/30">Omega-3 Rich</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-100">Overnight Chia & Nut Buster Oats</h4>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><i class="far fa-clock"></i> 5 Mins Prep • No Cooking Required</p>
+                            </div>
+                            <button onclick="sendWA('Overnight Oats', ['Rolled Oats (1/2 cup)', 'Chia Seeds (1 tbsp)', 'Crushed Almonds & Walnuts (1 tbsp)', 'Skim Milk or Almond Milk (1 cup)', 'Apple or Berries (1/2 cup)', 'Cinnamon Powder (1/4 tsp)'])" class="bg-green-600/20 text-green-500 border border-green-500/40 p-2.5 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition active:scale-90 shadow-md">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-pitch-900/80 rounded-xl p-3 border border-slate-700/60 text-xs space-y-2">
+                            <div>
+                                <strong class="text-gold-400 uppercase text-[10px] tracking-wider block mb-1">🛒 Key Ingredients:</strong>
+                                <p class="text-slate-300 leading-relaxed text-[11px]">Rolled Oats (1/2 cup), Chia Seeds (1 tbsp), Chopped Walnuts/Almonds, Skim Milk, Apple, Cinnamon.</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2">
+                                <strong class="text-turf-500 uppercase text-[10px] tracking-wider block mb-1">👨‍🍳 Cooking Method:</strong>
+                                <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px] leading-relaxed">
+                                    <li>In a jar or bowl, combine oats, chia seeds, and cinnamon powder.</li>
+                                    <li>Pour in skim milk or almond milk and stir thoroughly.</li>
+                                    <li>Cover and chill in the fridge overnight (at least 6 hours).</li>
+                                    <li>In the morning, top with fresh diced apple & crushed walnuts. No sugar added!</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipe 3 -->
+                    <div class="recipe-card glass-panel rounded-2xl p-4 border-l-4 border-l-orange-500 shadow-lg space-y-3" data-category="lunch" data-search="liver detox lauki bottle gourd sabzi sgot sgpt dinner jeera">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-turf-500/20 text-turf-500 px-2 py-0.5 rounded border border-turf-500/30">SGOT / SGPT Detox</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/30">Light Dinner</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-100">Liver-Detox Lauki & Jeera Sabzi</h4>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><i class="far fa-clock"></i> 20 Mins • Ideal Light Dinner</p>
+                            </div>
+                            <button onclick="sendWA('Liver-Detox Lauki Sabzi', ['Bottle Gourd / Lauki (1 medium)', 'Tomatoes (2 chopped)', 'Cumin Seeds / Jeera (1 tsp)', 'Turmeric / Haldi (1/2 tsp)', 'Coriander Powder (1 tsp)', 'Fresh Coriander Leaves', 'Mustard Oil (1 tsp)'])" class="bg-green-600/20 text-green-500 border border-green-500/40 p-2.5 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition active:scale-90 shadow-md">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-pitch-900/80 rounded-xl p-3 border border-slate-700/60 text-xs space-y-2">
+                            <div>
+                                <strong class="text-gold-400 uppercase text-[10px] tracking-wider block mb-1">🛒 Key Ingredients:</strong>
+                                <p class="text-slate-300 leading-relaxed text-[11px]">Bottle Gourd/Lauki (1 medium), Tomatoes (2), Cumin (Jeera), Turmeric (Haldi), Fresh Coriander, 1 tsp Mustard Oil.</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2">
+                                <strong class="text-turf-500 uppercase text-[10px] tracking-wider block mb-1">👨‍🍳 Cooking Method:</strong>
+                                <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px] leading-relaxed">
+                                    <li>Heat 1 tsp mustard oil in a pressure cooker. Splutter cumin seeds.</li>
+                                    <li>Add chopped tomatoes, haldi, coriander powder, and salt. Cook till soft.</li>
+                                    <li>Toss in diced lauki and 1/4 cup water.</li>
+                                    <li>Pressure cook for 2-3 whistles. Garnish with heaps of fresh dhania.</li>
+                                    <li>Pair with 1 plain multigrain roti for minimum liver workload.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipe 4 -->
+                    <div class="recipe-card glass-panel rounded-2xl p-4 border-l-4 border-l-orange-500 shadow-lg space-y-3" data-category="snack" data-search="roasted makhana chana snack energy high fiber 4pm triglycerides">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/30">Low GI Snack</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-water-500/20 text-water-400 px-2 py-0.5 rounded border border-water-500/30">Burn Triglycerides</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-100">Spiced Makhana & Chana Crunch</h4>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><i class="far fa-clock"></i> 10 Mins • Perfect 4 PM Evening Snack</p>
+                            </div>
+                            <button onclick="sendWA('Makhana & Roasted Chana Mix', ['Phool Makhana / Foxnuts (2 cups)', 'Roasted Black Chana (1 cup)', 'Chaat Masala (1/2 tsp)', 'Roasted Cumin Powder (1/2 tsp)', 'Black Salt (1/4 tsp)', 'Olive Oil Spray / Ghee (1/2 tsp)'])" class="bg-green-600/20 text-green-500 border border-green-500/40 p-2.5 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition active:scale-90 shadow-md">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-pitch-900/80 rounded-xl p-3 border border-slate-700/60 text-xs space-y-2">
+                            <div>
+                                <strong class="text-gold-400 uppercase text-[10px] tracking-wider block mb-1">🛒 Key Ingredients:</strong>
+                                <p class="text-slate-300 leading-relaxed text-[11px]">Phool Makhana (2 cups), Roasted Chana (1 cup), Chaat Masala, Roasted Cumin, Black Salt, 1/2 tsp Ghee.</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2">
+                                <strong class="text-turf-500 uppercase text-[10px] tracking-wider block mb-1">👨‍🍳 Cooking Method:</strong>
+                                <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px] leading-relaxed">
+                                    <li>Dry roast makhana in a pan over low heat for 5-7 mins until crispy.</li>
+                                    <li>Add roasted chana into the pan.</li>
+                                    <li>Drizzle 1/2 tsp ghee/olive oil and toss to coat evenly.</li>
+                                    <li>Sprinkle chaat masala, jeera powder, and black salt. Store in an airtight container!</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipe 5 -->
+                    <div class="recipe-card glass-panel rounded-2xl p-4 border-l-4 border-l-orange-500 shadow-lg space-y-3" data-category="lunch" data-search="tofu chicken quinoa power bowl high protein lunch fiber broccoli">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/30">35g+ Protein</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-turf-500/20 text-turf-500 px-2 py-0.5 rounded border border-turf-500/30">Muscle Recovery</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-100">Grilled Protein & Quinoa Power Bowl</h4>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><i class="far fa-clock"></i> 25 Mins • Power Lunch</p>
+                            </div>
+                            <button onclick="sendWA('Quinoa Protein Power Bowl', ['Quinoa or Brown Rice (1/2 cup uncooked)', 'Firm Tofu or Chicken Breast (150g cubed)', 'Broccoli Florets (1 cup)', 'Bell Peppers (1 cup diced)', 'Minced Garlic (2 cloves)', 'Olive Oil (1 tsp)', 'Low-Sodium Soy Sauce (1 tsp)'])" class="bg-green-600/20 text-green-500 border border-green-500/40 p-2.5 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition active:scale-90 shadow-md">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-pitch-900/80 rounded-xl p-3 border border-slate-700/60 text-xs space-y-2">
+                            <div>
+                                <strong class="text-gold-400 uppercase text-[10px] tracking-wider block mb-1">🛒 Key Ingredients:</strong>
+                                <p class="text-slate-300 leading-relaxed text-[11px]">Quinoa / Brown Rice, Tofu or Chicken Breast (150g), Broccoli, Bell Peppers, Garlic, Olive Oil.</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2">
+                                <strong class="text-turf-500 uppercase text-[10px] tracking-wider block mb-1">👨‍🍳 Cooking Method:</strong>
+                                <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px] leading-relaxed">
+                                    <li>Boil quinoa in 1 cup water until fluffy (12 mins).</li>
+                                    <li>Sauté garlic and cubed tofu/chicken in 1 tsp olive oil until golden.</li>
+                                    <li>Add broccoli and peppers; stir-fry on high heat for 3-4 mins (crunchy).</li>
+                                    <li>Mix cooked quinoa with veggies & protein. Season with pepper & lemon juice.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipe 6 -->
+                    <div class="recipe-card glass-panel rounded-2xl p-4 border-l-4 border-l-orange-500 shadow-lg space-y-3" data-category="lunch" data-search="soya chunks palak spinach fiber curry lunch dinner high protein">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded border border-purple-500/30">Plant Isoflavones</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-water-500/20 text-water-400 px-2 py-0.5 rounded border border-water-500/30">High Fiber</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-100">Soya Chunks & Palak Detox Curry</h4>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><i class="far fa-clock"></i> 20 Mins • Lunch / Dinner</p>
+                            </div>
+                            <button onclick="sendWA('Soya Chunks & Palak Curry', ['Soya Chunks (1 cup dry)', 'Spinach/Palak Puree (2 cups)', 'Onion (1 finely chopped)', 'Tomato Puree (1/2 cup)', 'Ginger-Garlic Paste (1 tsp)', 'Garam Masala (1/2 tsp)', 'Mustard Oil (1 tsp)'])" class="bg-green-600/20 text-green-500 border border-green-500/40 p-2.5 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition active:scale-90 shadow-md">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-pitch-900/80 rounded-xl p-3 border border-slate-700/60 text-xs space-y-2">
+                            <div>
+                                <strong class="text-gold-400 uppercase text-[10px] tracking-wider block mb-1">🛒 Key Ingredients:</strong>
+                                <p class="text-slate-300 leading-relaxed text-[11px]">Soya Chunks (1 cup), Spinach Puree (2 cups), Chopped Onion, Tomato Puree, Ginger-Garlic Paste, Spices.</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2">
+                                <strong class="text-turf-500 uppercase text-[10px] tracking-wider block mb-1">👨‍🍳 Cooking Method:</strong>
+                                <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px] leading-relaxed">
+                                    <li>Boil soya chunks in salted water for 5 mins; squeeze water out completely.</li>
+                                    <li>Sauté chopped onions & ginger-garlic paste in 1 tsp oil until golden.</li>
+                                    <li>Add tomato puree, haldi, & red chilli powder; cook till oil releases.</li>
+                                    <li>Add fresh spinach puree and squeezed soya chunks. Simmer for 8 mins.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipe 7 -->
+                    <div class="recipe-card glass-panel rounded-2xl p-4 border-l-4 border-l-orange-500 shadow-lg space-y-3" data-category="snack" data-search="beetroot carrot detox salad bile flow liver cleaning side salad">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-danger-500/20 text-danger-500 px-2 py-0.5 rounded border border-danger-500/30">Betalain Antioxidants</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-turf-500/20 text-turf-500 px-2 py-0.5 rounded border border-turf-500/30">Cleans Fatty Liver</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-100">Steamed Beetroot & Mint Detox Salad</h4>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><i class="far fa-clock"></i> 10 Mins • Side Salad</p>
+                            </div>
+                            <button onclick="sendWA('Steamed Beetroot & Mint Salad', ['Beetroot (1 medium diced)', 'Carrot (1 diced)', 'Cucumber (1 diced)', 'Fresh Mint Leaves (handful)', 'Lemon Juice (1 tbsp)', 'Black Pepper (1/4 tsp)'])" class="bg-green-600/20 text-green-500 border border-green-500/40 p-2.5 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition active:scale-90 shadow-md">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-pitch-900/80 rounded-xl p-3 border border-slate-700/60 text-xs space-y-2">
+                            <div>
+                                <strong class="text-gold-400 uppercase text-[10px] tracking-wider block mb-1">🛒 Key Ingredients:</strong>
+                                <p class="text-slate-300 leading-relaxed text-[11px]">Beetroot (1), Carrot (1), Cucumber (1), Mint Leaves, Lemon Juice, Black Pepper.</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2">
+                                <strong class="text-turf-500 uppercase text-[10px] tracking-wider block mb-1">👨‍🍳 Cooking Method:</strong>
+                                <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px] leading-relaxed">
+                                    <li>Lightly steam diced beetroot and carrots for 5 minutes (keeps active enzymes intact).</li>
+                                    <li>Let cool, then toss with fresh cucumber cubes & torn mint leaves.</li>
+                                    <li>Dress with fresh lemon juice & black pepper right before eating.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recipe 8 -->
+                    <div class="recipe-card glass-panel rounded-2xl p-4 border-l-4 border-l-orange-500 shadow-lg space-y-3" data-category="snack" data-search="golden turmeric ginger recovery tea milk night sleep liver inflammation">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/30">Curcumin Elixir</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded border border-purple-500/30">Anti-Inflammatory</span>
+                                </div>
+                                <h4 class="text-base font-bold text-slate-100">Golden Turmeric & Ginger Night Brew</h4>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><i class="far fa-clock"></i> 7 Mins • Pre-Bedtime Night Drink</p>
+                            </div>
+                            <button onclick="sendWA('Golden Turmeric & Ginger Brew', ['Skim Milk or Water (1 cup)', 'Raw Turmeric / Haldi (1/2 tsp)', 'Fresh Ginger (1/2 inch crushed)', 'Black Pepper (tiny pinch)', 'Cinnamon Stick (1 small)'])" class="bg-green-600/20 text-green-500 border border-green-500/40 p-2.5 rounded-xl flex items-center justify-center hover:bg-green-600 hover:text-white transition active:scale-90 shadow-md">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-pitch-900/80 rounded-xl p-3 border border-slate-700/60 text-xs space-y-2">
+                            <div>
+                                <strong class="text-gold-400 uppercase text-[10px] tracking-wider block mb-1">🛒 Key Ingredients:</strong>
+                                <p class="text-slate-300 leading-relaxed text-[11px]">Skim Milk/Water (1 cup), Raw Haldi (1/2 tsp), Crushed Ginger, Pinch of Black Pepper, Cinnamon.</p>
+                            </div>
+                            <div class="border-t border-slate-800 pt-2">
+                                <strong class="text-turf-500 uppercase text-[10px] tracking-wider block mb-1">👨‍🍳 Cooking Method:</strong>
+                                <ol class="list-decimal list-inside text-slate-300 space-y-1 text-[11px] leading-relaxed">
+                                    <li>Boil milk/water with crushed ginger, cinnamon, and haldi powder on low heat.</li>
+                                    <li>Simmer for 5 minutes so bioactive compounds dissolve thoroughly.</li>
+                                    <li>Add a tiny pinch of black pepper (boosts curcumin absorption by 2000%!).</li>
+                                    <li>Strain and drink warm 30 mins before sleep to aid overnight liver cell repair.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="tab-career" class="tab-content space-y-6">
+                <div class="text-center py-4">
+                    <div class="w-16 h-16 bg-gold-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-gold-500 text-2xl border border-gold-500/30 shadow-[inset_0_0_10px_rgba(251,191,36,0.3)]">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-1 tracking-wide">Trophy Cabinet</h2>
+                    <p class="text-xs text-slate-400 px-4">Career Stats & Elite Achievements. Earn 7x to unlock <span class="text-gold-400 font-bold">THALA EDITION</span>.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-panel p-4 rounded-xl text-center border-t-2 border-water-400 shadow-lg">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Lifetime Runs</p>
+                        <p id="careerRuns" class="text-4xl font-sports font-bold text-white">0</p>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl text-center border-t-2 border-turf-500 shadow-lg">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Batting Avg</p>
+                        <p id="careerAvg" class="text-4xl font-sports font-bold text-white">0%</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-bold text-gold-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <i class="fas fa-medal"></i> Badges Earned
+                    </h3>
+                    <div class="grid grid-cols-3 gap-3" id="trophyGrid">
+                        <!-- Dynamic Trophies will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-settings" class="tab-content space-y-6">
+                <div class="text-center py-4">
+                    <div class="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300 text-2xl border border-slate-600">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-1 tracking-wide">Dressing Room</h2>
+                    <p class="text-xs text-slate-400">App Settings & Exports</p>
+                </div>
+
+                <div class="glass-panel rounded-xl p-2 flex flex-col gap-1 shadow-lg">
+                    <button onclick="showRulebook()" class="w-full text-left p-4 rounded-lg hover:bg-slate-800 transition flex items-center gap-4 active:scale-95">
+                        <div class="w-8 h-8 rounded bg-gold-500/20 text-gold-400 flex items-center justify-center"><i class="fas fa-book-open"></i></div>
+                        <span class="text-sm font-bold text-slate-200 tracking-wide">Coach's Rulebook</span>
+                    </button>
+                    <button onclick="exportData()" class="w-full text-left p-4 rounded-lg hover:bg-slate-800 transition flex items-center gap-4 active:scale-95">
+                        <div class="w-8 h-8 rounded bg-water-500/20 text-water-400 flex items-center justify-center"><i class="fas fa-file-csv"></i></div>
+                        <span class="text-sm font-bold text-slate-200 tracking-wide">Export Scout Report (CSV)</span>
+                    </button>
+                    <div class="h-[1px] bg-slate-700/50 mx-4 my-2"></div>
+                    <button onclick="factoryReset()" class="w-full text-left p-4 rounded-lg hover:bg-danger-500/10 transition flex items-center gap-4 group active:scale-95">
+                        <div class="w-8 h-8 rounded bg-danger-500/20 text-danger-500 flex items-center justify-center"><i class="fas fa-trash-alt group-hover:animate-bounce"></i></div>
+                        <span class="text-sm font-bold text-danger-500 tracking-wide">Factory Reset Data</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <nav class="absolute bottom-0 left-0 w-full glass-panel border-t border-slate-800 pb-safe pt-2 px-2 flex justify-between items-center z-40 rounded-t-2xl">
+            <button onclick="switchTab('tab-score', this)" class="nav-btn active flex-1 flex flex-col items-center gap-1 text-slate-500 hover:text-white transition py-2 active:scale-90">
+                <i class="fas fa-trophy text-xl"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Match</span>
+            </button>
+            <button onclick="switchTab('tab-physio', this)" class="nav-btn flex-1 flex flex-col items-center gap-1 text-slate-500 hover:text-white transition py-2 relative active:scale-90">
+                <i class="fas fa-heartbeat text-xl"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Physio</span>
+                <span id="physioNotif" class="absolute top-2 right-1/4 w-2 h-2 bg-danger-500 rounded-full shadow-[0_0_5px_#ef4444] hidden animate-pulse"></span>
+            </button>
+            <button onclick="switchTab('tab-kitchen', this)" class="nav-btn flex-1 flex flex-col items-center gap-1 text-slate-500 hover:text-white transition py-2 active:scale-90">
+                <i class="fas fa-fire-burner text-xl"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Kitchen</span>
+            </button>
+            <button onclick="switchTab('tab-career', this)" class="nav-btn flex-1 flex flex-col items-center gap-1 text-slate-500 hover:text-white transition py-2 active:scale-90">
+                <i class="fas fa-medal text-xl"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Stats</span>
+            </button>
+            <button onclick="switchTab('tab-settings', this)" class="nav-btn flex-1 flex flex-col items-center gap-1 text-slate-500 hover:text-white transition py-2 active:scale-90">
+                <i class="fas fa-door-closed text-xl"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Room</span>
+            </button>
+        </nav>
+    </div>
+
+    
+    <!-- Rulebook -->
+    <div id="rulebookModal" class="fixed inset-0 z-[100] bg-black/90 hidden flex-col items-center justify-center p-4">
+        <div class="bg-pitch-800 border border-gold-500/50 w-full max-w-md rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(251,191,36,0.15)] animate-slide-up">
+            <div class="bg-gradient-to-r from-pitch-900 to-pitch-800 p-5 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="text-lg font-sports font-bold text-gold-400 uppercase tracking-widest"><i class="fas fa-book-open mr-2"></i> Coach's Manual</h3>
+                <button onclick="closeModal('rulebookModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6 max-h-[65vh] overflow-y-auto custom-scrollbar space-y-5">
+                <p class="text-sm text-slate-300 font-medium leading-relaxed">Welcome to your Health Innings. Goal: Lower LDL Cholesterol and Liver enzymes by scoring runs and avoiding wickets.</p>
+                
+                <div class="bg-pitch-900 p-4 rounded-xl border border-slate-700 shadow-inner">
+                    <h4 class="text-sm font-bold text-gold-400 mb-3 uppercase tracking-wider"><i class="fas fa-stopwatch mr-1"></i> Timing The Ball</h4>
+                    <ul class="text-xs space-y-3 text-slate-300">
+                        <li class="flex items-center gap-3"><span class="w-14 font-bold text-gold-400 bg-gold-500/20 px-2 py-1 rounded text-center">SIXER!</span> <span>Within 15 mins (+6 Runs)</span></li>
+                        <li class="flex items-center gap-3"><span class="w-14 font-bold text-water-400 bg-water-500/20 px-2 py-1 rounded text-center">FOUR!</span> <span>Within 1 hour (+4 Runs)</span></li>
+                        <li class="flex items-center gap-3"><span class="w-14 font-bold text-slate-400 bg-slate-700 px-2 py-1 rounded text-center">SINGLE</span> <span>Logged late/early (+1 Run)</span></li>
+                    </ul>
+                </div>
+
+                <div class="bg-pitch-900 p-4 rounded-xl border border-turf-500/30">
+                    <h4 class="text-sm font-bold text-turf-500 mb-2 uppercase tracking-wider"><i class="fas fa-trophy mr-1"></i> Match Rules & Stumps</h4>
+                    <p class="text-xs text-slate-300 mb-2 leading-relaxed"><strong>Target Chase:</strong> Daily target is 30 Runs. The Required Run Rate (RRR) will pressure you if you fall behind.</p>
+                    <p class="text-xs text-slate-300 leading-relaxed"><strong>Declare Innings:</strong> Declare between 10:00 PM - 7:00 AM. Triggers <em>Sleep Mode</em> until 6:00 AM to force liver recovery. Tap sleep screen 10 times for emergency wake.</p>
+                    <p class="text-xs text-gold-400 mt-2 font-bold bg-gold-500/10 p-2 rounded border border-gold-500/30">🎉 CENTURY MAKER: Declare your innings with 30+ Runs and 0 Wickets to trigger a massive confetti celebration!</p>
+                </div>
+
+                <div class="dhoni-tier p-4 rounded-xl border relative overflow-hidden">
+                    <i class="fas fa-crown absolute -right-2 -bottom-2 text-6xl opacity-20"></i>
+                    <h4 class="text-sm font-bold text-black mb-2 uppercase tracking-wider relative z-10"><i class="fas fa-star mr-1"></i> MSD #7 (Thala Edition)</h4>
+                    <p class="text-xs text-black leading-relaxed font-semibold relative z-10">Trophies stack! Earn the same trophy multiple times to level it up (x2, x3...). If you earn it <strong class="text-white bg-black px-1 rounded">7 TIMES</strong>, it upgrades to the ultimate glowing THALA TIER!</p>
+                </div>
+
+                <div class="bg-pitch-900 p-4 rounded-xl border border-purple-500/30">
+                    <h4 class="text-sm font-bold text-purple-400 mb-2 uppercase tracking-wider"><i class="fas fa-bolt mr-1"></i> Elite Mechanics</h4>
+                    <ul class="text-xs space-y-3 text-slate-300 leading-relaxed">
+                        <li><strong class="text-gold-400">Morning Powerplay:</strong> Sun Bath & Breakfast before 9 AM = 2x Water Runs for 3 hours!</li>
+                        <li><strong class="text-turf-500">Impact Player:</strong> Save 1 cheat meal per week from being a Wicket (Costs 10 Runs penalty).</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-700 bg-pitch-900">
+                <button onclick="closeModal('rulebookModal'); markRulesSeen();" class="w-full bg-gold-500 text-black font-bold py-3.5 rounded-lg uppercase tracking-widest hover:bg-gold-400 transition active:scale-95 shadow-lg">Understood, Coach</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canteen Modal -->
+    <div id="canteenModal" class="fixed inset-0 z-[100] bg-black/90 hidden flex-col items-center justify-end sm:justify-center p-0 sm:p-4 transition-all">
+        <div class="bg-pitch-800 border-t sm:border border-slate-700 w-full max-w-md rounded-t-3xl sm:rounded-2xl h-[85vh] sm:h-[75vh] flex flex-col animate-slide-up shadow-2xl">
+            <div class="p-5 border-b border-slate-700 flex justify-between items-center shrink-0 bg-pitch-900 rounded-t-3xl sm:rounded-t-2xl">
+                <h3 class="text-lg font-sports font-bold text-white uppercase tracking-widest"><i class="fas fa-store text-gold-400 mr-2"></i> The Canteen</h3>
+                <button onclick="closeModal('canteenModal')" class="text-slate-400 hover:text-white w-8 h-8 flex items-center justify-center bg-slate-700 rounded-full active:scale-90 transition"><i class="fas fa-chevron-down"></i></button>
+            </div>
+            <div class="p-4 shrink-0 bg-pitch-800 border-b border-slate-700">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="foodSearch" onkeyup="filterFood()" placeholder="Search 100+ foods (e.g., Samosa)..." class="w-full bg-pitch-900 text-white text-sm rounded-xl py-3.5 pl-11 pr-4 outline-none border border-slate-600 focus:border-gold-500 transition shadow-inner">
+                </div>
+            </div>
+            <div id="foodList" class="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar bg-pitch-900">
+                <!-- Food items generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="fixed inset-0 z-[120] bg-black/80 hidden flex-col items-center justify-center p-4">
+        <div class="bg-pitch-800 border border-gold-500 p-6 w-full max-w-xs rounded-2xl text-center animate-pop shadow-2xl">
+            <h3 id="alertTitle" class="text-xl font-sports font-bold text-gold-400 mb-2 uppercase tracking-wide">Alert</h3>
+            <p id="alertBody" class="text-sm text-slate-300 mb-6 font-medium"></p>
+            <button onclick="closeModal('alertModal')" class="w-full bg-slate-700 text-white font-bold py-3 rounded-xl hover:bg-slate-600 transition active:scale-95">OK</button>
+        </div>
+    </div>
+
+    <!-- Press Conference -->
+    <div id="pressConfModal" class="fixed inset-0 z-[110] bg-black/90 hidden flex-col items-center justify-center p-4">
+        <div class="bg-pitch-800 border border-water-500 w-full max-w-sm rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(56,189,248,0.2)] animate-pop text-center relative z-20">
+            <div class="absolute top-0 left-0 w-full h-1 bg-water-500"></div>
+            <div class="p-6">
+                <i class="fas fa-microphone-alt text-5xl text-water-400 mb-4 opacity-80 drop-shadow-lg"></i>
+                <h3 class="text-2xl font-sports font-bold text-white uppercase tracking-widest mb-1">Post-Match</h3>
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Press Conference</h4>
+                
+                <div class="flex justify-center items-center gap-8 mb-6 bg-pitch-900 py-4 rounded-xl border border-slate-700">
+                    <div>
+                        <div class="text-4xl font-sports font-bold text-gold-400 led-text" id="pcRuns">0</div>
+                        <div class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Runs</div>
+                    </div>
+                    <div class="text-2xl text-slate-600">-</div>
+                    <div>
+                        <div class="text-4xl font-sports font-bold text-danger-500 led-text" id="pcWkts">0</div>
+                        <div class="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Wickets</div>
+                    </div>
+                </div>
+
+                <div class="bg-pitch-900 p-5 rounded-xl border border-slate-700 mb-6 relative">
+                    <i class="fas fa-quote-left absolute top-3 left-3 text-slate-700 text-xl"></i>
+                    <p id="pcCommentary" class="text-sm text-slate-300 italic relative z-10 px-5 font-medium leading-relaxed">Commentary goes here.</p>
+                </div>
+
+                <button onclick="goToSleep()" class="w-full bg-slate-800 border border-slate-600 text-slate-200 font-bold py-4 rounded-xl uppercase tracking-wider hover:bg-slate-700 hover:text-white transition flex items-center justify-center gap-3 active:scale-95 shadow-lg">
+                    <i class="fas fa-bed text-purple-400"></i> Head to Pavilion (Sleep)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sleep Screen -->
+    <div id="sleepScreen" class="fixed inset-0 z-[200] bg-pitch-900 hidden flex-col items-center justify-center p-6 text-center select-none cursor-pointer" onclick="handleSleepClick()">
+        <div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
+        <div class="w-32 h-32 rounded-full bg-slate-800/50 flex items-center justify-center mb-6 relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <i class="fas fa-moon text-6xl text-slate-400 sleep-text"></i>
+        </div>
+        <h1 class="text-5xl font-sports font-bold text-slate-300 uppercase tracking-widest mb-3 relative z-10">Stumps</h1>
+        <p class="text-lg text-slate-500 mb-8 relative z-10 font-medium">Play suspended for Liver Recovery.</p>
+        <p class="text-xs text-slate-600 uppercase tracking-widest sleep-text relative z-10 font-bold border border-slate-700 px-4 py-2 rounded-full">Play resumes at 06:00 AM</p>
+        <p id="sleepClickText" class="absolute bottom-12 text-xs text-danger-500 font-bold tracking-widest uppercase hidden bg-danger-500/10 px-5 py-2.5 rounded-full border border-danger-500/30 z-20"></p>
+    </div>
+
+    <script>
+        // Data Models
+        let healthData = JSON.parse(localStorage.getItem('romitUltimateData')) || [];
+        let todayString = new Date().toDateString();
+
+        const foodDB = [
+            // Healthy Indian & Global
+            { name: "Oats with Almonds", type: "healthy" }, { name: "Moong Dal Chilla", type: "healthy" },
+            { name: "Boiled Eggs (3)", type: "healthy" }, { name: "Brown Rice & Dal", type: "healthy" },
+            { name: "Roti (2) & Sabzi", type: "healthy" }, { name: "Roasted Makhana", type: "healthy" },
+            { name: "Apple / Banana", type: "healthy" }, { name: "Grilled Chicken Salad", type: "healthy" },
+            { name: "Paneer Bhurji", type: "healthy" }, { name: "Dal Tadka", type: "healthy"},
+            { name: "Soya Chunks", type: "healthy" }, { name: "Green Salad", type: "healthy" },
+            { name: "Poha", type: "healthy" }, { name: "Upma", type: "healthy" }, { name: "Idli (2)", type: "healthy" },
+            { name: "Plain Dosa", type: "healthy" }, { name: "Quinoa Salad", type: "healthy" },
+            { name: "Spinach Soup", type: "healthy" }, { name: "Papaya", type: "healthy" }, { name: "Watermelon", type: "healthy" },
+            { name: "Sweet Potato", type: "healthy" }, { name: "Rajma (Kidney Beans)", type: "healthy" },
+            { name: "Chana Masala", type: "healthy" }, { name: "Tofu Curry", type: "healthy" },
+            { name: "Boiled Sprouts", type: "healthy" }, { name: "Cucumber Raita", type: "healthy" },
+            { name: "Khichdi", type: "healthy" }, { name: "Dalia", type: "healthy" }, { name: "Multigrain Roti", type: "healthy" },
+            { name: "Steamed Broccoli", type: "healthy" }, { name: "Grilled Fish", type: "healthy" }, { name: "Karela Sabzi", type: "healthy" },
+            { name: "Lauki Sabzi", type: "healthy" }, { name: "Green Tea", type: "healthy" }, { name: "Black Coffee", type: "healthy" },
+            { name: "Buttermilk (Chaas)", type: "healthy" }, { name: "Coconut Water", type: "healthy" }, { name: "Millet Dosa", type: "healthy" },
+            { name: "Chia Pudding", type: "healthy" }, { name: "Grilled Salmon", type: "healthy" },
+            
+            // Junk / Cheats
+            { name: "Samosa", type: "junk" }, { name: "Chole Bhature", type: "junk" }, 
+            { name: "Pizza (Slice)", type: "junk" }, { name: "Burger", type: "junk" }, 
+            { name: "French Fries", type: "junk" }, { name: "Ice Cream", type: "junk" },
+            { name: "Beer / Alcohol", type: "junk" }, { name: "Cold Drink / Soda", type: "junk" }, 
+            { name: "Biscuits / Cookies", type: "junk" }, { name: "Maggie / Noodles", type: "junk" },
+            { name: "Vada Pav", type: "junk" }, { name: "Pav Bhaji", type: "junk" }, { name: "Gulab Jamun", type: "junk" },
+            { name: "Jalebi", type: "junk" }, { name: "Rasgulla", type: "junk" }, { name: "Pastry / Cake", type: "junk" },
+            { name: "Chocolate Bar", type: "junk" }, { name: "Potato Chips / Lays", type: "junk" }, { name: "Nachos", type: "junk" },
+            { name: "Fried Rice", type: "junk" }, { name: "Manchurian", type: "junk" }, { name: "Spring Rolls", type: "junk" },
+            { name: "Fried Momos", type: "junk" }, { name: "Kathi Roll", type: "junk" }, { name: "Puri Sabzi", type: "junk" },
+            { name: "Bhujia / Namkeen", type: "junk" }, { name: "Patties", type: "junk" }, { name: "Pasta (White Sauce)", type: "junk" },
+            { name: "Garlic Bread", type: "junk" }, { name: "Cheesecake", type: "junk" }, { name: "Bhatura", type: "junk" }
+        ];
+
+        // Trophies Database with Multiplier counter logic
+        const trophiesDB = [
+            { id: "tr_cen", name: "Century Maker", icon: "fas fa-star", color: "text-gold-400", border: "border-gold-500", desc: "30+ Runs, 0 Wkts (Daily)", 
+              count: (stats) => Object.values(stats.days).filter(d => d.runs >= 30 && d.wickets === 0).length },
+            
+            { id: "tr_wall", name: "The Wall", icon: "fas fa-shield-alt", color: "text-turf-500", border: "border-turf-500", desc: "7 Days unbeaten", 
+              count: (stats) => Math.floor(stats.maxStreak / 7) },
+            
+            { id: "tr_iron", name: "Iron Liver", icon: "fas fa-heartbeat", color: "text-danger-500", border: "border-danger-500", desc: "14 Days unbeaten", 
+              count: (stats) => Math.floor(stats.maxStreak / 14) },
+            
+            { id: "tr_ascetic", name: "The Ascetic", icon: "fas fa-om", color: "text-purple-400", border: "border-purple-400", desc: "30 Days unbeaten", 
+              count: (stats) => Math.floor(stats.maxStreak / 30) },
+            
+            { id: "tr_hyd", name: "Hydration King", icon: "fas fa-tint", color: "text-water-400", border: "border-water-500", desc: "10+ water in a day", 
+              count: (stats) => Object.values(stats.days).filter(d => d.water >= 10).length },
+            
+            { id: "tr_sun", name: "Sun God", icon: "fas fa-sun", color: "text-orange-400", border: "border-orange-500", desc: "7 consecutive Sun Baths", 
+              count: (stats) => Math.floor(stats.maxSunStreak / 7) },
+            
+            { id: "tr_allr", name: "All-Rounder", icon: "fas fa-medal", color: "text-teal-400", border: "border-teal-500", desc: "All 6 tasks in one day", 
+              count: (stats) => Object.values(stats.days).filter(d => d.tasks >= 6).length },
+            
+            { id: "tr_hat", name: "Hat-Trick", icon: "fas fa-bullseye", color: "text-pink-400", border: "border-pink-500", desc: "3 Sixers in one day", 
+              count: (stats) => Object.values(stats.days).filter(d => d.sixers >= 3).length },
+            
+            { id: "tr_pp", name: "Powerplay Pro", icon: "fas fa-bolt", color: "text-yellow-300", border: "border-yellow-400", desc: "Activate Powerplay", 
+              count: (stats) => stats.ppCt },
+            
+            { id: "tr_night", name: "Night Watchman", icon: "fas fa-moon", color: "text-slate-400", border: "border-slate-500", desc: "Good Sleep logged", 
+              count: (stats) => stats.sleepCt },
+            
+            { id: "tr_walk", name: "Pace Bowler", icon: "fas fa-shoe-prints", color: "text-lime-400", border: "border-lime-500", desc: "Night Walks logged", 
+              count: (stats) => stats.walkCt },
+            
+            { id: "tr_dbl", name: "Double Century", icon: "fas fa-crown", color: "text-amber-500", border: "border-amber-600", desc: "50+ Runs in one day", 
+              count: (stats) => Object.values(stats.days).filter(d => d.runs >= 50).length }
+        ];
+
+        // Init
+        window.onload = function() {
+            updateVitDUI();
+            startClockAndSleepCheck();
+        };
+
+        // --- Clock & Sleep Engine ---
+        let sleepClicks = 0;
+        let sleepCheckInterval;
+
+        function startClockAndSleepCheck() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            checkAutoSleep();
+            sleepCheckInterval = setInterval(checkAutoSleep, 60000);
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('digitalClock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+            if (localStorage.getItem('romitPowerplayExpiry')) isPowerplayActive(); 
+        }
+
+        function checkAutoSleep() {
+            const hr = new Date().getHours();
+            const sleepScreen = document.getElementById('sleepScreen');
+            if (hr >= 6 && hr < 22) {
+                if (!sleepScreen.classList.contains('hidden')) {
+                    sleepScreen.classList.add('hidden'); sleepScreen.classList.remove('flex');
+                    localStorage.removeItem('romitForceAwake');
+                }
+            } else if (hr >= 22 || hr < 6) {
+                if (localStorage.getItem('romitForceAwake') !== new Date().toDateString()) {
+                    sleepScreen.classList.remove('hidden'); sleepScreen.classList.add('flex');
+                }
+            }
+        }
+
+        function handleSleepClick() {
+            sleepClicks++;
+            const clickText = document.getElementById('sleepClickText');
+            if (sleepClicks > 0 && sleepClicks < 10) {
+                clickText.innerText = `Force Wake: Tap ${10 - sleepClicks} more times`;
+                clickText.classList.remove('hidden');
+            } else if (sleepClicks >= 10) {
+                document.getElementById('sleepScreen').classList.add('hidden');
+                document.getElementById('sleepScreen').classList.remove('flex');
+                clickText.classList.add('hidden');
+                sleepClicks = 0;
+                localStorage.setItem('romitForceAwake', new Date().toDateString());
+                showToast("Emergency Wake Up Activated", "fa-unlock", true);
+            }
+        }
+
+        function goToSleep() {
+            closeModal('pressConfModal');
+            sleepClicks = 0;
+            localStorage.removeItem('romitForceAwake');
+            document.getElementById('sleepScreen').classList.remove('hidden');
+            document.getElementById('sleepScreen').classList.add('flex');
+            document.getElementById('sleepClickText').classList.add('hidden');
+        }
+
+        // --- Animation Engine ---
+        function fireConfetti() {
+            for(let i=0; i<60; i++) {
+                let conf = document.createElement('div');
+                conf.className = 'confetti';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.animationDelay = Math.random() * 2 + 's';
+                conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                conf.style.backgroundColor = ['#fbbf24', '#38bdf8', '#10b981', '#ef4444', '#a78bfa'][Math.floor(Math.random()*5)];
+                document.body.appendChild(conf);
+                setTimeout(() => conf.remove(), 4500);
+            }
+        }
+
+        function triggerScreenAnimation(type) {
+            const textEl = document.createElement('div');
+            let text = ""; let colorClass = ""; let showBall = false;
+
+            if(type === 'sixer') { text = "SIXER!"; colorClass = "text-gold-400"; showBall = true; }
+            else if (type === 'boundary') { text = "FOUR!"; colorClass = "text-water-400"; showBall = true; }
+            else if (type === 'wicket') { 
+                text = "WICKET! 💥"; colorClass = "text-danger-500";
+                document.body.classList.add('shake-screen');
+                setTimeout(() => document.body.classList.remove('shake-screen'), 600);
+            }
+            else if (type === 'sleep') { text = "GREAT INNINGS 🌙"; colorClass = "text-purple-400"; }
+            else if (type === 'vitd') { text = "LOCKED! ☀️"; colorClass = "text-gold-400"; }
+
+            textEl.className = `anim-center-text ${colorClass}`;
+            textEl.innerText = text;
+            document.body.appendChild(textEl);
+
+            if(showBall) {
+                const ballEl = document.createElement('div');
+                ballEl.className = 'anim-flying-ball'; ballEl.innerText = '🔴';
+                document.body.appendChild(ballEl);
+                setTimeout(() => ballEl.remove(), 1600);
+            }
+            setTimeout(() => textEl.remove(), 1900);
+        }
+
+        function enterArena() {
+            document.getElementById('loginScreen').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appContainer').classList.remove('hidden');
+                document.getElementById('appContainer').classList.add('flex');
+                updateDashboard();
+                if(!localStorage.getItem('romitRulesSeen')) setTimeout(() => showRulebook(), 500);
+            }, 700);
+        }
+
+        function switchTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        // UI Helpers
+        function showToast(msg, icon = 'fa-bell', isAlert = false) {
+            const toast = document.getElementById('toastContainer');
+            const toastMsg = document.getElementById('toastMsg');
+            document.getElementById('toastText').innerText = msg;
+            toastMsg.innerHTML = `<i class="fas ${icon}"></i> <span>${msg}</span>`;
+            
+            if(isAlert) {
+                toastMsg.classList.remove('border-gold-500', 'text-gold-400');
+                toastMsg.classList.add('border-danger-500', 'text-danger-500', 'bg-danger-500/10');
+            } else {
+                toastMsg.classList.add('border-gold-500', 'text-gold-400');
+                toastMsg.classList.remove('border-danger-500', 'text-danger-500', 'bg-danger-500/10');
+            }
+            toast.classList.remove('hidden');
+            toastMsg.style.animation = 'none'; toastMsg.offsetHeight; 
+            toastMsg.style.animation = 'toastSlide 3s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function customAlert(title, body) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertBody').innerText = body;
+            document.getElementById('alertModal').classList.remove('hidden');
+            document.getElementById('alertModal').classList.add('flex');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+        function showAbout() {
+            document.getElementById('aboutModal').classList.remove('hidden');
+            document.getElementById('aboutModal').classList.add('flex');
+        }
+        function showRulebook() {
+            document.getElementById('rulebookModal').classList.remove('hidden');
+            document.getElementById('rulebookModal').classList.add('flex');
+        }
+        function markRulesSeen() { localStorage.setItem('romitRulesSeen', 'true'); }
+        
+        let currentRecipeCategory = 'all';
+
+        function setRecipeCategory(cat, btn) {
+            currentRecipeCategory = cat;
+            document.querySelectorAll('.recipe-cat-btn').forEach(b => {
+                b.classList.remove('active', 'bg-orange-500', 'text-black');
+                b.classList.add('bg-pitch-800', 'text-slate-400', 'border', 'border-slate-700');
+            });
+            btn.classList.add('active', 'bg-orange-500', 'text-black');
+            btn.classList.remove('bg-pitch-800', 'text-slate-400', 'border', 'border-slate-700');
+            filterKitchenRecipes();
+        }
+
+        function filterKitchenRecipes() {
+            const query = (document.getElementById('recipeSearch')?.value || '').toLowerCase().trim();
+            const cards = document.querySelectorAll('.recipe-card');
+
+            cards.forEach(card => {
+                const cat = card.getAttribute('data-category');
+                const searchData = card.getAttribute('data-search') || '';
+                const titleText = card.querySelector('h4')?.innerText.toLowerCase() || '';
+                
+                const matchesCategory = (currentRecipeCategory === 'all' || cat === currentRecipeCategory);
+                const matchesSearch = !query || searchData.includes(query) || titleText.includes(query);
+
+                if (matchesCategory && matchesSearch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function sendWA(recipe, ing) {
+            let text = `*Shopping List for ${recipe}* 🏏🛒%0A%0A`;
+            ing.forEach(i => text += `✅ ${i}%0A`);
+            text += `%0A_Sent from Romit's Scoreboard_`;
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        // --- CORE LOGGING ---
+        function logData(type, name, score, btnId = null, extraMsg = "") {
+            const now = new Date();
+            healthData.push({
+                id: Date.now(), timestamp: now.getTime(), dateStr: now.toDateString(),
+                timeStr: now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                type: type, name: name, score: score, btnId: btnId, msg: extraMsg
+            });
+            localStorage.setItem('romitUltimateData', JSON.stringify(healthData));
+            updateDashboard();
+        }
+
+        function logTask(name, targetTimeStr, btnId) {
+            const now = new Date();
+            const [targetHr, targetMin] = targetTimeStr.split(':');
+            let target = new Date(); target.setHours(parseInt(targetHr), parseInt(targetMin), 0, 0);
+            const diffMins = Math.abs((now - target) / 60000);
+            let score = 1; let type = "single"; let msg = "Single! Logged outside target time.";
+            let icon = "fa-running text-slate-400";
+            
+            if (diffMins <= 15) { score = 6; type = "sixer"; msg = "SIXER! Perfect timing!"; icon = "fa-baseball-ball text-gold-400"; triggerScreenAnimation('sixer'); }
+            else if (diffMins <= 60) { score = 4; type = "boundary"; msg = "FOUR! Good timing."; icon = "fa-star text-water-400"; triggerScreenAnimation('boundary'); }
+
+            logData(type, name, score, btnId, msg);
+            showToast(`${msg} (+${score} Runs)`, icon);
+            checkPowerplay();
+        }
+
+        function logWater() { 
+            if (isPowerplayActive()) {
+                logData('water', 'Glass of Water (250ml)', 2, null, "Powerplay Active! +2 Runs");
+                showToast("Powerplay Water! +2 Runs", "fa-bolt text-gold-400");
+            } else {
+                logData('water', 'Glass of Water (250ml)', 1, null, "Good hydration."); 
+                showToast("Water added! +1 Run", "fa-glass-water text-water-400");
+            }
+        }
+
+        // --- POWERPLAY & IMPACT PLAYER ---
+        function checkPowerplay() {
+            const now = new Date(); if (now.getHours() >= 9) return; 
+            const todaysLogs = healthData.filter(d => d.dateStr === todayString);
+            const hasSun = todaysLogs.some(d => d.name.includes('Sun Bath'));
+            const hasBf = todaysLogs.some(d => d.name.includes('Breakfast'));
+
+            if (hasSun && hasBf && !localStorage.getItem('romitPowerplayExpiry')) {
+                const expiry = now.getTime() + (3 * 60 * 60 * 1000); 
+                localStorage.setItem('romitPowerplayExpiry', expiry.toString());
+                showToast("POWERPLAY ACTIVATED! 2x Runs for 3 Hours!", "fa-bolt text-gold-400", false);
+                document.getElementById('powerplayIndicator').classList.remove('hidden');
+                triggerScreenAnimation('sixer');
+            }
+        }
+        function isPowerplayActive() {
+            const expiry = localStorage.getItem('romitPowerplayExpiry');
+            if (!expiry) return false;
+            if (Date.now() > parseInt(expiry)) {
+                localStorage.removeItem('romitPowerplayExpiry');
+                document.getElementById('powerplayIndicator').classList.add('hidden');
+                return false;
+            }
+            document.getElementById('powerplayIndicator').classList.remove('hidden');
+            return true;
+        }
+
+        function checkImpactPlayerAvailable() {
+            const now = new Date(); const day = now.getDay();
+            const diff = now.getDate() - day + (day === 0 ? -6 : 1); 
+            const monday = new Date(now.setDate(diff)); monday.setHours(0,0,0,0);
+            return !healthData.some(d => d.type === 'impact_player' && d.timestamp >= monday.getTime());
+        }
+
+        // --- PHYSIO LOGIC ---
+        function logSupplement(name, btnId) {
+            logData('single', name, 1, btnId, "Liver protection taken.");
+            showToast("Supplement Logged. +1 Run", "fa-pills");
+        }
+        function updateVitDUI() {
+            const lastDate = localStorage.getItem('romitVitDDate');
+            const statusEl = document.getElementById('vitDStatus');
+            const btn = document.getElementById('btn-sup-vitd');
+            const notif = document.getElementById('physioNotif');
+            if(!lastDate) { statusEl.innerText = "Dose Required"; notif.classList.remove('hidden'); return; }
+            const lastTime = parseInt(lastDate); const now = new Date().getTime();
+            const daysDiff = (now - lastTime) / (1000 * 3600 * 24);
+            if(daysDiff >= 7) {
+                statusEl.innerText = "DUE TODAY"; statusEl.classList.replace('text-gold-400', 'text-danger-500');
+                btn.classList.remove('ticked'); notif.classList.remove('hidden');
+            } else {
+                statusEl.innerText = new Date(lastTime).toLocaleDateString(); statusEl.classList.replace('text-danger-500', 'text-gold-400');
+                btn.classList.add('ticked'); notif.classList.add('hidden');
+            }
+        }
+        function logVitD() {
+            logData('sixer', 'Vitamin D 60k IU', 6, 'btn-sup-vitd', "Weekly dose locked.");
+            localStorage.setItem('romitVitDDate', Date.now().toString());
+            showToast("Vit D Locked! +6 Runs", "fa-sun text-gold-400");
+            triggerScreenAnimation('vitd'); updateVitDUI();
+        }
+        function logSleep() {
+            const hrs = prompt("How many hours did you sleep last night?");
+            if(hrs && !isNaN(hrs)) {
+                const h = parseFloat(hrs);
+                if(h >= 7) { 
+                    logData('sleep', `Good Sleep (${h}h)`, 6, null, "Liver Recovery Optimal."); 
+                    showToast("Great sleep! +6 Runs", "fa-bed text-purple-400"); triggerScreenAnimation('sleep');
+                } else { 
+                    logData('wicket', `Poor Sleep (${h}h)`, 0, null, "Inadequate Liver Rest."); 
+                    customAlert("Warning", "Poor sleep damages the liver! Wicket lost."); triggerScreenAnimation('wicket');
+                }
+            }
+        }
+
+        // --- CANTEEN (FOOD DB) ---
+        function openCanteen() {
+            document.getElementById('canteenModal').classList.remove('hidden');
+            document.getElementById('canteenModal').classList.add('flex');
+            document.getElementById('foodSearch').value = ''; renderFood();
+            setTimeout(() => document.getElementById('foodSearch').focus(), 100);
+        }
+        function renderFood(filterStr = "") {
+            const list = document.getElementById('foodList'); list.innerHTML = "";
+            let found = false; const searchLower = filterStr.toLowerCase();
+            foodDB.forEach(f => {
+                if(f.name.toLowerCase().includes(searchLower)) { found = true; addFoodToDOM(list, f.name, f.type); }
+            });
+            if(!found && filterStr.trim() !== "") {
+                let guessedType = "junk";
+                if(["roti","rice","dal","paneer","salad","fruit","apple","chicken","fish"].some(w=>searchLower.includes(w))) guessedType = "healthy";
+                addFoodToDOM(list, `Custom: ${filterStr}`, guessedType);
+            }
+        }
+        function addFoodToDOM(list, name, type) {
+            let actions = "";
+            if(type === 'healthy' || name.startsWith("Custom")) {
+                actions += `<button onclick="logCanteenFood('${name}', false)" class="px-3 py-1.5 bg-turf-500/20 text-turf-500 text-xs font-bold rounded border border-turf-500/50 hover:bg-turf-500 hover:text-black transition active:scale-95">+ RUNS</button>`;
+            }
+            actions += `<button onclick="logCanteenFood('${name}', true)" class="px-3 py-1.5 bg-danger-500/20 text-danger-500 text-xs font-bold rounded border border-danger-500/50 hover:bg-danger-500 hover:text-white transition active:scale-95">+ WICKET</button>`;
+            list.innerHTML += `<div class="flex justify-between items-center bg-pitch-800 p-3.5 rounded-xl border border-slate-700 shadow-sm"><span class="text-sm font-semibold text-slate-200">${name}</span><div class="flex gap-2">${actions}</div></div>`;
+        }
+        function filterFood() { renderFood(document.getElementById('foodSearch').value); }
+        function logCanteenFood(name, isCheat) {
+            closeModal('canteenModal');
+            if(isCheat) { 
+                if (checkImpactPlayerAvailable()) {
+                    if (confirm(`Use your weekly IMPACT PLAYER for ${name}?\nIt costs 10 Runs but SAVES a Wicket!`)) {
+                        logData('impact_player', `Impact Player: ${name}`, -10, null, "Wicket saved! Penalty: -10 Runs.");
+                        showToast("Impact Player Used! Wicket Saved.", "fa-user-ninja", false); return;
+                    }
+                }
+                logData('wicket', name, 0, null, "Unhealthy choice."); 
+                showToast("WICKET! Cheat meal logged.", "fa-skull", true); triggerScreenAnimation('wicket');
+            } else { 
+                logData('boundary', name, 4, null, "Healthy choice."); 
+                showToast("Great choice! +4 Runs", "fa-utensils text-turf-500"); triggerScreenAnimation('boundary');
+            }
+        }
+
+        // --- DASHBOARD & TROPHIES ---
+        function updateDashboard() {
+            const todaysLogs = healthData.filter(d => d.dateStr === todayString);
+            isPowerplayActive(); updateCareerStats(); 
+            
+            let runs = 0; let wickets = 0; let waterCount = 0;
+            const commBox = document.getElementById('commentaryBox'); commBox.innerHTML = "";
+            document.querySelectorAll('.cricket-tick').forEach(btn => { if(btn.id !== 'btn-sup-vitd') btn.classList.remove('ticked'); });
+
+            todaysLogs.sort((a,b) => b.timestamp - a.timestamp).forEach(log => {
+                if(log.type === 'wicket') wickets++; else runs += log.score;
+                if(log.type === 'water') waterCount++;
+                if(log.btnId && document.getElementById(log.btnId)) document.getElementById(log.btnId).classList.add('ticked');
+
+                let badgeColor = "bg-slate-700 text-slate-300"; let badgeText = "SINGLE";
+                if(log.type === 'wicket') { badgeColor = "bg-danger-500 text-white"; badgeText = "WICKET"; }
+                else if(log.type === 'sixer') { badgeColor = "bg-gold-500 text-black"; badgeText = "SIXER!"; }
+                else if(log.type === 'boundary') { badgeColor = "bg-water-500 text-black"; badgeText = "FOUR!"; }
+                else if(log.type === 'water') { badgeColor = "bg-pitch-700 text-water-400 border border-water-500/50"; badgeText = "WATER"; }
+                else if(log.type === 'impact_player') { badgeColor = "bg-purple-600 text-white"; badgeText = "IMPACT"; }
+
+                commBox.innerHTML += `
+                    <div class="flex flex-col border-l-2 border-slate-600 pl-3 py-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[10px] text-slate-500 font-mono">${log.timeStr}</span>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${badgeColor}">${badgeText}</span>
+                        </div>
+                        <div class="text-slate-300 font-medium">${log.name}</div>
+                        <div class="text-[11px] text-slate-400 italic mt-0.5">${log.msg}</div>
+                    </div>`;
+            });
+
+            if(todaysLogs.length === 0) commBox.innerHTML = "<div class='text-center text-slate-500 text-sm py-6 italic'>Match has not started. Awaiting first delivery...</div>";
+            document.getElementById('mainRuns').innerText = runs; document.getElementById('mainWickets').innerText = wickets;
+            document.getElementById('waterTracker').innerText = `x${waterCount}`;
+            
+            // RRR Logic
+            const hr = new Date().getHours(); const min = new Date().getMinutes();
+            let rrrText = "0.0";
+            if (runs >= 30) { rrrText = "Target Achieved!"; document.getElementById('rrrDisplay').classList.replace('text-slate-300', 'text-turf-500'); } 
+            else if (hr >= 22 || hr < 6) { rrrText = "Stumps (Paused)"; document.getElementById('rrrDisplay').classList.replace('text-turf-500', 'text-slate-300'); } 
+            else {
+                let hoursRemaining = (22 - hr) - (min / 60);
+                if (hoursRemaining <= 0.1) hoursRemaining = 0.1; 
+                const rrr = ((30 - runs) / hoursRemaining).toFixed(1);
+                rrrText = `RRR: ${rrr}`;
+                if(rrr > 4) document.getElementById('rrrDisplay').classList.replace('text-slate-300', 'text-danger-500');
+                else document.getElementById('rrrDisplay').classList.replace('text-danger-500', 'text-slate-300');
+            }
+            document.getElementById('rrrDisplay').innerText = rrrText;
+            updateFormGuide();
+        }
+
+        function updateFormGuide() {
+            const fgBox = document.getElementById('formGuide'); fgBox.innerHTML = '';
+            const daysMap = {};
+            healthData.forEach(log => {
+                if(!daysMap[log.dateStr]) daysMap[log.dateStr] = { wickets: 0 };
+                if(log.type === 'wicket') daysMap[log.dateStr].wickets++;
+            });
+            const sortedDates = Object.keys(daysMap).sort((a,b) => new Date(b) - new Date(a)).slice(0, 5).reverse();
+            if(sortedDates.length === 0) { fgBox.innerHTML = '<span class="text-[10px] text-slate-500 uppercase tracking-widest">No Data</span>'; return; }
+            sortedDates.forEach(date => {
+                const w = daysMap[date].wickets;
+                if(w === 0) fgBox.innerHTML += `<span class="w-3 h-3 rounded-full bg-turf-500 shadow-[0_0_5px_#10b981]" title="Clean Day"></span>`;
+                else fgBox.innerHTML += `<span class="w-3 h-3 rounded-full bg-danger-500 shadow-[0_0_5px_#ef4444]" title="Wickets Lost: ${w}"></span>`;
+            });
+        }
+
+        function updateCareerStats() {
+            let totalRuns = 0; let healthyMeals = 0; let cheatMeals = 0;
+            let dailyStats = {}; let waterDays = {}; let sunDays = {};
+            let taskDays = {}; let sixerDays = {}; let sleepCt = 0; let walkCt = 0; let ppCt = 0;
+
+            healthData.forEach(d => {
+                if (d.type !== 'wicket' && d.type !== 'impact_player') totalRuns += d.score;
+                if (d.type === 'boundary' || d.type === 'sixer') healthyMeals++;
+                if (d.type === 'wicket') cheatMeals++;
+                if (d.type === 'sleep') sleepCt++;
+                if (d.name.includes("Night Walk")) walkCt++;
+                if (d.msg.includes("Powerplay Active")) ppCt++;
+
+                if (!dailyStats[d.dateStr]) {
+                    dailyStats[d.dateStr] = { runs: 0, wickets: 0, water: 0, sun: false, tasks: 0, sixers: 0 };
+                }
+                
+                if (d.type === 'wicket') dailyStats[d.dateStr].wickets++;
+                else if (d.type !== 'impact_player') dailyStats[d.dateStr].runs += d.score;
+                
+                if (d.type === 'water') dailyStats[d.dateStr].water++;
+                if (d.name.includes('Sun Bath')) dailyStats[d.dateStr].sun = true;
+                if (d.btnId) dailyStats[d.dateStr].tasks++;
+                if (d.type === 'sixer') dailyStats[d.dateStr].sixers++;
+            });
+
+            document.getElementById('careerRuns').innerText = totalRuns;
+            let avg = 0; if ((healthyMeals + cheatMeals) > 0) avg = Math.round((healthyMeals / (healthyMeals + cheatMeals)) * 100);
+            document.getElementById('careerAvg').innerText = avg + '%';
+
+            // Calculate Streaks
+            let maxStreak = 0; let currentStreak = 0; let sunStreak = 0; let maxSunStreak = 0;
+            const sortedDates = Object.keys(dailyStats).sort((a,b) => new Date(a) - new Date(b));
+            
+            sortedDates.forEach(date => {
+                const day = dailyStats[date];
+                // Unbeaten Streak
+                if (day.wickets === 0) { currentStreak++; if(currentStreak > maxStreak) maxStreak = currentStreak; }
+                else { currentStreak = 0; }
+                // Sun Streak
+                if (day.sun) { sunStreak++; if(sunStreak > maxSunStreak) maxSunStreak = sunStreak; }
+                else { sunStreak = 0; }
+            });
+
+            let statsObj = {
+                days: dailyStats, maxStreak: maxStreak, maxSunStreak: maxSunStreak,
+                ppCt: ppCt, sleepCt: sleepCt, walkCt: walkCt
+            };
+
+            // Render Trophies dynamically
+            const tGrid = document.getElementById('trophyGrid');
+            tGrid.innerHTML = '';
+            
+            trophiesDB.forEach(t => {
+                let count = t.count(statsObj);
+                let isDhoni = count >= 7;
+                let unlocked = count > 0;
+
+                let opacity = unlocked ? '' : 'badge-locked';
+                let shadow = unlocked ? (isDhoni ? '' : `shadow-[0_0_15px_currentColor]`) : '';
+                let borderClass = isDhoni ? '' : t.border;
+                let iconClass = isDhoni ? 'text-black' : t.color;
+                let titleText = isDhoni ? `THALA: ${t.name}` : t.name;
+                let badgeText = isDhoni ? '🏏 7x (MSD)' : (count > 1 ? `x${count}` : '');
+                
+                let badgeHtml = count > 1 ? `<div class="absolute -top-2 -right-2 bg-danger-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg z-10 ${isDhoni ? 'bg-black text-gold-400 border border-gold-500' : ''}">${badgeText}</div>` : '';
+                let dhoniTierClass = isDhoni ? 'dhoni-tier' : '';
+
+                tGrid.innerHTML += `
+                    <div class="glass-panel p-3 rounded-xl text-center border ${borderClass} ${opacity} ${shadow} ${dhoniTierClass} transition-all duration-500 flex flex-col items-center justify-center min-h-[90px] relative active:scale-95 cursor-pointer">
+                        ${badgeHtml}
+                        <i class="${t.icon} text-2xl ${iconClass} mb-1.5"></i>
+                        <h4 class="text-[10px] font-bold text-white uppercase tracking-wider leading-tight z-10">${titleText}</h4>
+                        <p class="text-[8px] text-slate-400 mt-1 uppercase z-10">${t.desc}</p>
+                    </div>`;
+            });
+        }
+
+        function declareInnings() {
+            const hr = new Date().getHours();
+            if(hr >= 22 || hr < 7) { 
+                const runs = parseInt(document.getElementById('mainRuns').innerText);
+                const wkts = parseInt(document.getElementById('mainWickets').innerText);
+                let comm = `"Solid knock today, Romit. Let's carry this form into tomorrow." - Coach`;
+                if (wkts >= 2) comm = `"Poor shot selection. Those wickets hurt our momentum. Respect the diet tomorrow!" - Coach`;
+                else if (runs < 15) comm = `"Left too many runs out there. Poor hydration. Pitch drying up!" - Coach`;
+                else if (runs >= 30 && wkts === 0) {
+                    comm = `"Flawless innings! A true captain's knock. Bad cholesterol has no chance." - Coach`;
+                    fireConfetti(); // Celebration!
+                }
+
+                document.getElementById('pcRuns').innerText = runs; document.getElementById('pcWkts').innerText = wkts;
+                document.getElementById('pcCommentary').innerText = comm;
+                document.getElementById('pressConfModal').classList.remove('hidden'); document.getElementById('pressConfModal').classList.add('flex');
+            } else {
+                customAlert("Umpire Decision", "Play is still on! You can only declare innings between 10:00 PM and 7:00 AM.");
+            }
+        }
+
+        function exportData() {
+            if(healthData.length === 0) { customAlert("Error", "No data to export."); return; }
+            let csv = "Date,Time,Type,Event,Score_Or_Status\n";
+            healthData.forEach(d => { csv += `${d.dateStr},${d.timeStr},${d.type},${d.name},${d.type==='wicket'?'Wicket':d.score}\n`; });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.setAttribute('href', url); a.setAttribute('download', 'Romit_Scout_Report.csv');
+            a.click();
+        }
+
+        function factoryReset() {
+            if(confirm("DANGER: Wiping all match history! Are you sure?")) {
+                localStorage.clear(); location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
